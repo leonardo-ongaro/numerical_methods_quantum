@@ -1,35 +1,32 @@
-import numpy as np
-
 def factorial(n):
-    fact = 1
+    fact = 1    
 
-    for i in range(1, n+1):
-        fact *= i
+    for i in range(1, n+1):     # loop over 1 to n included
+        fact *= i       # the factorial is the product of all the numbers below n
 
     return fact 
 
 def fibonacci(n):
-    fib = np.array([])
+    fib = []
 
-    a = 0
-    b = 1
-
+    a, b = 0, 1     # first two numbers of the Fibonacci series
+    
+    # the first two numbers are manually added to the succession
     if n >= 1:
-        fib = np.append(fib, a)
+        fib.append(a)
     if n >= 2:
-        fib = np.append(fib, b)
+        fib.append(b)
 
-    for i in range(2, n):
-        temp = b
-        b = a + b
-        a = temp
-
-        fib = np.append(fib, b)
+    for i in range(2, n):  # implementation of f(n) = f(n-1)+f(n-2)
+        a, b = b, a + b
+        fib.append(b)
 
     return fib 
 
 def main():
-    n = int(input("Enter a non negative integer: "))
+    print("Factorial of 10 and first 10 elements of the Fibonacci suquence")
+
+    n = 10
 
     fact = factorial(n)
     fib = fibonacci(n)
