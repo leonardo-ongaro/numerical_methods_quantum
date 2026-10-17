@@ -30,7 +30,6 @@ def machine_epsilon(dtype = float):
     if not np.issubdtype(dtype, np.floating): # raise an error if the input is not a floating point 
         raise TypeError("The data type must be a floating point") # this error can be catched in the main
     
-    # declaring epsilon and one to be of type dtype
     epsilon = dtype(1)
     one = dtype(1)
 
@@ -90,7 +89,81 @@ def f_better(x):
         raise TypeError("The type of x must be a number")
     return 2*np.sin(x/2)**2
 
+def factorial(n):
+    """
+    Calculate the factorial of a non-negative integer.
 
+    Args:
+        n (int): The number whose factorial is to be calculated.
+
+    Returns:
+        int: The factorial of n.
+
+    Raises:
+        TypeError: If n is not an integer.
+        ValueError: If n is a negative integer.
+    """
+    if not isinstance(n, numbers.Integral):
+        raise TypeError("n must be an integer.")
+
+    if n < 0:
+        raise ValueError("n cannot be negative.")
+
+    fact = 1
+
+    # The factorial is the product of all integers from 1 to n
+    for i in range(1, n + 1):
+        fact *= i
+
+    return fact
+
+assert factorial(5) == 120
+
+def fibonacci(n):
+    """
+    Generate the first n numbers of the Fibonacci sequence.
+
+    Args:
+        n (int): The number of Fibonacci numbers to generate.
+
+    Returns:
+        list: A list containing the first n Fibonacci numbers.
+
+    Raises:
+        TypeError: If n is not an integer.
+        ValueError: If n is a negative integer.
+    """
+    if not isinstance(n, numbers.Integral):
+        raise TypeError("n must be an integer.")
+
+    if n < 0:
+        raise ValueError("n cannot be negative.")
+
+    fib = []
+
+    a, b = 0, 1  # First two numbers of the Fibonacci sequence
+
+    # Add the first two numbers to the sequence
+    if n >= 1:
+        fib.append(a)
+    if n >= 2:
+        fib.append(b)
+
+    # Compute the remaining Fibonacci numbers:
+    # f(n) = f(n-1) + f(n-2)
+    for i in range(2, n):
+        a, b = b, a + b
+        fib.append(b)
+
+    return fib
+
+assert fibonacci(7) == [0, 1, 1, 2, 3, 5, 8]
+
+def checkpoint (*values, msg = "", debug = True):
+    """ Print a labelled debug message, silenced when debug=False"""
+    if debug:
+        label = f"[checkpoint] {msg}" if msg else "[checkpoint]"
+    print(label, *values)
 
 if __name__ == "__main__":
     # DATA TYPES AND PRECISION
@@ -159,12 +232,16 @@ if __name__ == "__main__":
     # SUMMATION ORDER MATTERS
     l = [10**16] + [1.0] * 10**6
     sum = 0
-    for i in l:
-        sum += i 
+    for i in range(len(l)):
+        sum += l[i]
+        if i % 10**5 == 0:
+            checkpoint(sum, msg = "", debug = True) 
     print(f"The sum in the given order is {sum}")
     sum = 0
-    for i in reversed(l):
-        sum += i
+    for i in range(len(l)-1, -1, -1):
+        sum += l[i]
+        if i % 10**5 == 0:
+            checkpoint(sum, msg = "", debug = True) 
     print(f"The sum with the small numbers first and the largest last is {sum}")
     print(f"The sum using math.fsum is {math.fsum(l)}")
 
@@ -173,3 +250,23 @@ if __name__ == "__main__":
     #np.seterr(over='raise')
     print(f"If we add 1 to 32767 stored as a 16 bits integer we obtain {a16 + np.int16(1)}")
 
+    # FACTORIAL 
+    num = 5
+    try:
+        result = factorial(num)
+        print(f"Factorial of {num}:", result)
+
+    except TypeError as e:
+        print("Type error:", e)
+    except ValueError as e:
+        print("Value error:", e)
+
+    # FIBONACCI
+    num = 7
+    try:
+        result = fibonacci(7)
+        print(f"Fibonacci sequence with {num} values:", result)
+    except TypeError as e:
+        print("Type error:", e)
+    except ValueError as e:
+        print("Value error:", e)
