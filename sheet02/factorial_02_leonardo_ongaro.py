@@ -16,11 +16,12 @@ function when executed as a standalone script.
 
 import numbers
 
+
 def checkpoint (*values, msg = "", debug = True):
     """ Print a labelled debug message, silenced when debug=False"""
     if debug:
         label = f"[checkpoint] {msg}" if msg else "[checkpoint]"
-    print(label, *values)
+        print(label, *values)
 
 def factorial(n):
     """
@@ -53,6 +54,7 @@ def factorial(n):
     return fact
 
 assert factorial(5) == 120
+
 
 if __name__ == "__main__":
     num = 5

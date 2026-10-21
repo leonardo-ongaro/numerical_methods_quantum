@@ -25,8 +25,6 @@ def machine_epsilon(dtype = float):
         If the specified data type is not a floating-point type.
     """
 
-
-
     if not np.issubdtype(dtype, np.floating): # raise an error if the input is not a floating point 
         raise TypeError("The data type must be a floating point") # this error can be catched in the main
     
@@ -67,7 +65,7 @@ def f(x):
 
 def f_better(x): 
     """
-    Evaluate the function 2 * sin(x / 2) ** 2.
+    Evaluate the function 2 * sin(x / 2) ** 2 / x ** 2.
 
     Parameters
     ----------
@@ -77,7 +75,7 @@ def f_better(x):
     Returns
     -------
         float or numpy number
-        The result of evaluating 2 * sin(x / 2) ** 2.
+        The result of evaluating 2 * sin(x / 2) ** 2 / x ** 2.
 
     Raises
     ------
@@ -87,7 +85,7 @@ def f_better(x):
         
     if not isinstance(x, numbers.Number) and not isinstance(x, np.number):
         raise TypeError("The type of x must be a number")
-    return 2*np.sin(x/2)**2
+    return 2*np.sin(x/2)**2/x**2
 
 def factorial(n):
     """
@@ -163,15 +161,17 @@ def checkpoint (*values, msg = "", debug = True):
     """ Print a labelled debug message, silenced when debug=False"""
     if debug:
         label = f"[checkpoint] {msg}" if msg else "[checkpoint]"
-    print(label, *values)
+        print(label, *values)
 
 if __name__ == "__main__":
     # DATA TYPES AND PRECISION
+
     a16 = np.int16(32767) # 32767 is the largest int with 16 bits
     a32 = np.int32(32767) # same value but stored as a 32 bits integer
 
-    print(f"If we add 1 to 32767 stored as a 16 bits integer we obtain {a16 + np.int16(1)}") # Runtime warning: integer overflow
+    print(f"If we add 1 to 32767 stored as a 16 bits integer we obtain {a16 + np.int16(1)}")        # Runtime warning: integer overflow
     print(f"If we add 1 to 32767 stored as a 32 bits integer we obtain {a32 + np.int32(2)}")
+
     print()
 
     f32_1 = np.float32(np.pi * 10 ** 32) # pi * 10 ** 32 as a float32
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     except TypeError as e:
         print(f"Error: {e}")
 
-    print("Evaluation of 2sin(x/2)**2 for: ")
+    print("Evaluation of 2sin(x/2)**2/x**2 for: ")
     try:
         print(f"x = 10 ** -4: {f_better(10**-4)}")
         print(f"x = 10 ** -8: {f_better(10**-8)}")
