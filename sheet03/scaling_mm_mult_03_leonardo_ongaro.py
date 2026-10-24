@@ -7,7 +7,7 @@ def t(N, c, p):
 
 if __name__ == "__main__":
     data_matmul = np.loadtxt("matmul_times.csv", delimiter=",")
-    Nsm = data_matmul[:, 0]
+    Nsm = data_matmul[:, 1]
     dt_matmul = data_matmul[:, 1]
 
     popt, pcov = curve_fit(t, Nsm, dt_matmul)
