@@ -27,11 +27,10 @@ def matmul(A, B):
         If the matrices are not two-dimensional or their
         dimensions are incompatible.
     """
-    # check if the inputs are numpy arrays
+
     if not isinstance(A, np.ndarray) or not isinstance(B, np.ndarray):
         raise TypeError("A and B must be numpy arrays")
 
-    # check if A and B are two-dimensional
     if A.ndim != 2 or B.ndim != 2:
         raise ValueError("A and B must be two-dimensional")
 
@@ -39,14 +38,12 @@ def matmul(A, B):
     if A.shape[1] != B.shape[0]:
         raise ValueError("Incompatible dimensions: A.shape[1] must be equal to B.shape[0]")
 
-    # check if the matrices have numerical values
     if not np.issubdtype(A.dtype, np.number) or not np.issubdtype(B.dtype, np.number):
         raise TypeError("A and B must contain numeric values.")
 
     n, k_dim = A.shape # dimensions of the matrix A
     m = B.shape[1] # number of columns of B
 
-    # initialization of C with zeros of the compatible data type between A and B
     C = np.zeros((n, m), dtype=np.result_type(A.dtype, B.dtype))
 
     for i in range(n):
@@ -59,7 +56,7 @@ def matmul(A, B):
 
 def sanity_check():
     """
-    Compare the custom matrix multiplication with NumPy.
+    Compute the two products.
 
     Returns
     ------
@@ -194,10 +191,7 @@ def save_times(filename, Ns, times):
     if Ns.ndim != 1 or times.ndim != 1:
         raise ValueError("Ns and times must be one-dimensional.")
 
-    if len(Ns) != len(times) or len(Ns) == 0:
-        raise ValueError("Ns and times must have equal nonzero lengths.")
-
-    if not np.all(np.isfinite(Ns)) or np.any(Ns <= 0):
+    if np.any(Ns <= 0):
         raise ValueError("Ns must contain positive finite values.")
 
     data = np.column_stack((Ns, times)) # convert the two arrays in one data with two columns

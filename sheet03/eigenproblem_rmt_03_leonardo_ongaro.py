@@ -76,7 +76,7 @@ def spacings(eigenvalues):
     return s
 
 
-def fit_and_plot(s, title, p0, bounds, bins = 80):
+def fit_and_plot(s, title, bins = 80):
     """
     Fit the histogram of the spacings with P(s) and plot data and fit.
 
@@ -132,11 +132,8 @@ def fit_and_plot(s, title, p0, bounds, bins = 80):
 
     counts, edges = np.histogram(s, bins=bins, density=True)
     centers = 0.5 * (edges[:-1] + edges[1:])
-
     p0 = [1.0, 1.0, 1.0, 1.0]
-
     bounds = ([1e-10, 0.0, 1e-10, 0.1], [100.0, 5.0, 100.0, 5.0])
-
     popt, _ = curve_fit(P, centers, counts, p0 = p0, bounds = bounds)
 
     print(f"\nFIT: {title.upper()}")
@@ -158,7 +155,7 @@ def fit_and_plot(s, title, p0, bounds, bins = 80):
 
 
 def main():
-    N = 5000
+    N = 2000
     try:
 
         # 1. REAL SYMMETRIC MATRIX
@@ -166,7 +163,7 @@ def main():
         A = (A + A.T) / 2
         ev1, _ = eigh(A)
         s1 = spacings(ev1)
-        fit_and_plot(s1, "Real symmetric", p0=[1.5, 1.0, 0.8, 2.0], bounds=([0.1, 0.0, 0.05, 0.5], [10.0, 4.0, 5.0, 4.0]))
+        fit_and_plot(s1, "Real symmetric")
         plt.show()
     except (TypeError, ValueError, RuntimeError, FloatingPointError) as error:
         print(f"\nError with the real symmetric matrix: {error}")
@@ -177,7 +174,7 @@ def main():
         B = np.diag(np.random.rand(N))
         ev2, _ = eigh(B)
         s2 = spacings(ev2)
-        fit_and_plot(s2, "Diagonal", p0=[1.0, 0.0, 1.0, 1.0], bounds=([0.1, 0.0, 0.05, 0.5], [10.0, 4.0, 5.0, 4.0]))
+        fit_and_plot(s2, "Diagonal")
         plt.show()
     except (TypeError, ValueError, RuntimeError, FloatingPointError) as error:
         print(f"\nError with the diagonal matrix: {error}")
@@ -188,7 +185,7 @@ def main():
         C = (X + X.conj().T) / 2
         ev3, _ = eigh(C)
         s3 = spacings(ev3)
-        fit_and_plot(s3, "Hermitian", p0=[3.0, 2.0, 1.3, 2.0], bounds=([0.1, 0.0, 0.05, 0.5], [20.0, 4.0, 5.0, 4.0]))
+        fit_and_plot(s3, "Hermitian")
         plt.show()
     except (TypeError, ValueError, RuntimeError, FloatingPointError) as error:
         print(f"\nError with the Hermitian matrix: {error}")
