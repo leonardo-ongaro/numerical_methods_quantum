@@ -24,7 +24,34 @@ sigma_x = np.array([[0, 1], [1, 0]], dtype=complex)
 sigma_y = np.array([[0, -1j], [1j, 0]], dtype=complex)
 sigma_z = np.array([[1, 0], [0, -1]], dtype=complex)
 
+# TENSOR PRODUCT
+
 def my_kron(A, B):
+    """
+    Kronecker (tensor) product of two arrays, implemented block by block.
+ 
+    1D vectors are treated as column vectors (n, 1), so the result is
+    always a 2D matrix.
+ 
+    Parameters
+    ----------
+    A, B : array_like with ndim 1 or 2, numeric values (complex allowed).
+ 
+    Returns
+    -------
+    numpy.ndarray of shape (n_A*n_B, m_A*m_B).
+ 
+    Raises
+    ------
+    TypeError / ValueError if the inputs are not numeric 1D or 2D arrays.
+    """
+    if not np.issubdtype(A.dtype, np.number) or not np.issubdtype(B.dtype, np.number):
+        raise TypeError(f"A and B must contain only numbers (found dtype: {A.dtype}).")
+    if A.ndim not in [1,2] or B.ndim not in [1,2]:
+        raise ValueError(f"A and B must have ndim 1 or 2, found {A.ndim} and {B.ndim}.")
+    if not np.all(np.isfinite(A)) or not np.all(np.isfinite(B)):
+        raise ValueError(f"A or B contain NaN or infinite values.")
+
 
     if A.ndim == 1:
         A = A.reshape(-1, 1)
@@ -34,7 +61,8 @@ def my_kron(A, B):
     n_A, m_A = A.shape 
     n_B, m_B = B.shape 
 
-    C= np.zeros((n_A*n_B, m_A*m_B))
+    # Result dtype is complex if at least one input is 
+    C = np.zeros((n_A*n_B, m_A*m_B), dtype=np.result_type(A, B))
 
     for i in range(n_A):
         for j in range(m_A):
@@ -43,7 +71,33 @@ def my_kron(A, B):
     return C 
 
 def outer_product(A, B):
-    C = np.zeros((len(A), len(B)))
+    """
+    Outer product C[i, j] = A[i] * B[j] computed with explicit loops.
+ 
+    Parameters
+    ----------
+    A, B : array_like
+        Vectors.
+ 
+    Returns
+    -------
+    numpy.ndarray of shape (len(A), len(B)).
+    Note: for complex states the bra is NOT conjugated; to obtain |psi><psi|
+    call outer_product(psi, psi.conj()).
+ 
+    Raises
+    ------
+    TypeError / ValueError if the inputs are not numeric vectors.
+    """
+
+    if not np.issubdtype(A.dtype, np.number) or not np.issubdtype(B.dtype, np.number):
+        raise TypeError(f"A and B must contain only numbers (found dtype: {A.dtype}).")
+    if A.ndim != 1 or B.ndim != 1:
+        raise ValueError(f"A and B must have ndim 1, found {A.ndim} and {B.ndim}.")
+    if not np.all(np.isfinite(A)) or not np.all(np.isfinite(B)):
+        raise ValueError(f"A or B contain NaN or infinite values.")
+
+    C = np.zeros((len(A), len(B)), dtype=np.result_type(A, B))
 
     for i in range(len(A)):
         for j in range(len(B)):
@@ -52,24 +106,80 @@ def outer_product(A, B):
     return C
 
 def embed_operator(op, sites, N):
-    n, m = op.size
+    """
+    Embed a local operator into the space of N sites.
+ 
+    `op` is placed on every site in `sites`, the identity on all the others:
+    the result is the tensor product op_s1 (x) op_s2 (x) ... (x) I ...
+ 
+    Parameters
+    ----------
+    op : array_like, square matrix (n, n)
+        Local operator.
+    sites : list of int
+        Sites (0-indexed, distinct) on which op acts.
+    N : int
+        Total number of sites (N >= 1).
+ 
+    Returns
+    -------
+    numpy.ndarray of shape (n**N, n**N).
+ 
+    Raises
+    ------
+    TypeError / ValueError if op is not square, N is not a positive integer,
+    or sites is invalid.
+    """
+    if op.shape[0] != op.shape[1]:
+        raise ValueError(f"The operator must be square, found shape {op.shape}.")
+    if not np.issubdtype(op.dtype, np.number):
+        raise TypeError(f"The operator must contain only numbers (found dtype: {op.dtype}).")
+    if op.ndim != 2:
+        raise ValueError(f"The operator must have ndim 2, found {op.ndim}.")
+    if not np.all(np.isfinite(op)):
+        raise ValueError(f"A or B contain NaN or infinite values.")
+
+    if (not isinstance(N, (int, np.integer)) and not isinstance(N, (bool, np.bool_))) or N < 1:
+        raise ValueError("'N' must be an integer >= 1.")
+
+    if not isinstance(sites, (list, tuple, np.ndarray)):
+        raise TypeError(f"'The sites must be a list/tuple of integers.")
+    sites = list(sites)
+    if len(sites) == 0:
+        raise ValueError(f"The sites list cannot be empty.")
+    if not all(not isinstance(s, (int, np.integer)) and not isinstance(s, (bool, np.bool_)) for s in sites):
+        raise TypeError(f"The sites list must contain only integers.")
+    if any(s < 0 or s >= N for s in sites):
+        raise ValueError(f"The sites contains indices outside the range [0, {N - 1}].")
+
+    n = op.shape[0]
     I = np.eye(n)
     result = None  
 
     for site in range(1, N+1):
-        if site in sites:
-            local_op = op 
-        else:
-            local_op = I 
-
-        if result == None:
-            result = local_op 
-        else:
-            result = my_kron(result, local_op)
-
+        local_op = op if site in sites else I
+        result = local_op if result is None else my_kron(result, local_op)
     return result 
 
 def check_density_matrix(A):
+    """
+    Check that A is a valid density matrix: unit trace, Hermitian and
+    positive semidefinite (within the tolerance tol).
+ 
+    Parameters
+    ----------
+    A : array_like, square matrix.
+    tol : float >= 0, numerical tolerance.
+ 
+    Returns
+    -------
+    bool
+ 
+    Raises
+    ------
+    TypeError / ValueError if A is not a numeric square matrix or tol is invalid.
+    """
+
     if np.trace(A) != 1:
         return False 
     if A != A.conjugate:
