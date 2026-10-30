@@ -1,4 +1,28 @@
+"""
+Contents 
+---------
+- my_kron: tensor product 
+- outer_product: outer product 
+- embed_operator: embdes a local operator into the N-site space
+- check_density_matrix: checks that a matrix is a valid density matrix 
+- purity: Tr(rho^2)
+- partial_trace: partial trace 
+- partial_trace_pure: partial trace computed directly from the state vector 
+- expect_full: expectation value of the full operator
+- expect_reduced: expectation value computer with the reduced density matrix 
+- compare_partial_trace_time: timing comparison between the two partial traces
+
+The main compares the 3-qubit GHZ state with the statistical mixture 0.5*|000><000| + 0.5*|111><111| through expectation values, purity and reduced density matrices
+"""
+
 import numpy as np
+import time 
+
+# PAULI MATRICES
+
+sigma_x = np.array([[0, 1], [1, 0]], dtype=complex)
+sigma_y = np.array([[0, -1j], [1j, 0]], dtype=complex)
+sigma_z = np.array([[1, 0], [0, -1]], dtype=complex)
 
 def my_kron(A, B):
 
@@ -82,9 +106,40 @@ def expect_reduced(rho, op, sites, dims):
     rho_A = partial_trace(rho, sites, dims)        
     return np.trace(rho_A @ op)
 
-sigma_x = np.matrix([[0, 1], [1, 0]])
-sigma_y = np.matrix([0, -1j], [1j, 0])
-sigma_z = np.matrix([1, 0], [0, -1])
+def partial_trace_pure(psi, keep, dims):
+    N = len(dims)
+    psi = np.asarray(psi).reshape(-1)
+    trace = [i for i in range(N) if i not in keep]
+    d_keep = int(np.prod([dims[k] for k in keep])) if keep else 1
+    M = psi.reshape(dims).transpose(keep + trace).reshape(d_keep, -1)
+    return M @ M.conj().T
+
+def compare_partial_trace_time(psi, rho, keep, dims, repeats=5):
+    """Time partial_trace(rho) vs partial_trace_pure(psi); return times, speedup, max difference."""
+    dims, keep = list(dims), list(keep)
+    D = int(np.prod(dims))
+    psi = np.asarray(psi).reshape(-1)
+    rho = np.asarray(rho)
+    if psi.size != D or rho.shape != (D, D):
+        raise ValueError("psi must have length prod(dims), rho shape (prod(dims),)*2")
+
+    def best_time(f):
+        best = np.inf
+        for _ in range(repeats):
+            t = time.perf_counter()
+            out = f()
+            best = min(best, time.perf_counter() - t)
+        return out, best
+
+    r_rho, t_rho = best_time(lambda: partial_trace(rho, keep, dims))
+    r_psi, t_psi = best_time(lambda: partial_trace_pure(psi, keep, dims))
+    diff = float(np.max(np.abs(r_rho - r_psi)))
+
+    print(f"N={len(dims)}, keep={keep}: rho route {t_rho:.3e} s | psi route {t_psi:.3e} s "
+          f"| speedup x{t_rho/t_psi:.1f} | max diff {diff:.1e}")
+    return {"t_rho": t_rho, "t_psi": t_psi, "speedup": t_rho / t_psi, "max_abs_diff": diff}
+
+
 
 def main():
     #------------------------
@@ -184,6 +239,10 @@ def main():
     print(f"Are the two methods equal, with two sites and rho_mix? {np.isclose(expect_full(rho_mix, sigma_z, [i, j], 3), expect_reduced(rho_mix, sigma_z, [i, j], 3))}")
 
 
+    #-------------------------------------
+    # PARTIAL TRACE OF A PURE STATE 
+    #-------------------------------------
 
+    compare_partial_trace_time(ghz, rho_ghz, keep=[1, 2], dims=[2]*12)
 
 
