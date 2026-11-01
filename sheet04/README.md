@@ -1,0 +1,2 @@
+FILES:
+-- "code_04_leonardo_ongaro.py": Python script implementing tensor product, outer product, operator embedding, expectation values and partial trace for many-qubit states (GHZ vs mixed state), with a timing comparison of the two partial-trace routines
