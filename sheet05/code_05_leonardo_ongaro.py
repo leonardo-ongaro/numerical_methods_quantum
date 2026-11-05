@@ -40,9 +40,9 @@ def one_sided_derivative(f, x0, h):
             If h is negative
     """
     # INPUT CHECKS 
-    if not isinstance(x0, (np.integer, np.floating)):
+    if not isinstance(x0, (np.integer, np.floating, int, float)):
         raise TypeError("x0 must be an integer or a float")
-    if not isinstance(h, (np.integer, np.floating)):
+    if not isinstance(h, (np.integer, np.floating, int ,float)):
             raise TypeError("h must be an integer or a float")
     if h <= 0:
         raise ValueError("h must be positive")
@@ -77,9 +77,9 @@ def central_derivative(f, x0, h):
             If h is negative
     """
     # INPUT CHECKS 
-    if not isinstance(x0, (np.integer, np.floating)):
+    if not isinstance(x0, (np.integer, np.floating, int, float)):
         raise TypeError("x0 must be an integer or a float")
-    if not isinstance(h, (np.integer, np.floating)):
+    if not isinstance(h, (np.integer, np.floating, int, float)):
             raise TypeError("h must be an integer or a float")
     if h <= 0:
         raise ValueError("h must be positive")
@@ -94,7 +94,7 @@ def model(x, a, b):
 
         Parameters
         ----------
-        x: float
+        x: float or array
             Point in which compute the function
         a: float
             Parameter of the function
@@ -111,9 +111,9 @@ def model(x, a, b):
         TypeError
             If x is not a number and a and b are not floats
     """
-    if not isinstance(x, np.number):
+    if not isinstance(x, (np.integer, np.floating, int, float, np.ndarray)):
         raise TypeError("x must be a number")
-    if not isinstance(a, np.floating) or not isinstance(b, np.floating):
+    if not isinstance(a, (np.floating, float)) or not isinstance(b, (np.floating, float)):
          raise TypeError("a  and b must be floating numbers")
     
     return a * x ** b
@@ -146,9 +146,9 @@ def int_trap(f, a, b, N):
             If h is negative or if a >= b
     """
     # INPUT CHECKS 
-    if not isinstance(a, (np.integer, np.floating)) or not isinstance(b, (np.integer, np.floating)):
+    if not isinstance(a, (np.integer, np.floating, int, float)) or not isinstance(b, (np.integer, np.floating, int, float)):
         raise TypeError("a and b must be integers or floats")
-    if not isinstance(N, np.integer):
+    if not isinstance(N, (np.integer, int)):
             raise TypeError("N must be an integer")
     if N <= 0:
         raise ValueError("N must be positive")
@@ -170,7 +170,7 @@ def int_trap(f, a, b, N):
 
 def simpson_integral(f, a, b, N):
     """
-        Evaluate the integral with the Simpson's rule
+        Evaluate the integral with Simpson's rule
     
         Parameters
         ----------
@@ -196,9 +196,9 @@ def simpson_integral(f, a, b, N):
             If h is negative or if a >= b or if N is odd
     """
     # INPUT CHECKS 
-    if not isinstance(a, (np.integer, np.floating)) or not isinstance(b, (np.integer, np.floating)):
+    if not isinstance(a, (np.integer, np.floating, int, float)) or not isinstance(b, (np.integer, np.floating, int, float)):
         raise TypeError("a and b must be integers or floats")
-    if not isinstance(N, np.integer):
+    if not isinstance(N, (np.integer, int)):
             raise TypeError("N must be an integer")
     if N <= 0:
         raise ValueError("N must be positive")
@@ -250,9 +250,9 @@ def gauss_legendre(f, a, b, n):
             If h is negative or if a >= b or if n is odd
     """
     # INPUT CHECKS 
-    if not isinstance(a, (np.integer, np.floating)) or not isinstance(b, (np.integer, np.floating)):
+    if not isinstance(a, (np.integer, np.floating, int, float)) or not isinstance(b, (np.integer, np.floating, int, float)):
         raise TypeError("a and b must be integers or floats")
-    if not isinstance(n, np.integer):
+    if not isinstance(n, (np.integer, int)):
             raise TypeError("N must be an integer")
     if n <= 0:
         raise ValueError("N must be positive")
@@ -286,7 +286,7 @@ def not_smooth_f(x):
         TypeError
             If x is not a number
     """
-    if not isinstance(x, np.number):
+    if not isinstance(x, (np.integer, np.floating, int, float, np.ndarray)):
         raise TypeError("x must be a number")
     return np.abs(x-0.3)
 
@@ -367,7 +367,7 @@ def main():
     try:
         a = 0 
         b = np.pi 
-        N = 100
+        N = 50
 
         print(f"Integral of sin(x) between a = {a} and b = {b}")
         print(f"Trapezoidal rule: {int_trap(np.sin, a, b, N)}")
