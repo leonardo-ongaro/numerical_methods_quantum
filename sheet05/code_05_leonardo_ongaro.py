@@ -1,6 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from numpy.polynomial.legendre import leggauss
 
 def one_sided_derivative(f, x0, h):
     return (f(x0+h)-f(x0))/h
@@ -41,6 +42,13 @@ def simpson_integral(f, a, b, N):
     sum *= h/3
     return sum 
 
+def gauss_legendre(f, a, b, n):
+    x, w = leggauss(n)                  
+    t = 0.5*(b-a)*x + 0.5*(b+a)         
+    return 0.5*(b-a)*np.sum(w*f(t))
+
+def not_smooth_f(x):
+    return np.abs(x-0.3)
 
 def main():
     # DERIVATIVES
@@ -110,14 +118,15 @@ def main():
     # INTEGRALS 
     a = 0 
     b = np.pi 
-    N = 10
+    N = 100
 
     print(f"Integral of sin(x) between a = {a} and b = {b}")
     print(f"Trapezoidal rule: {int_trap(np.sin, a, b, N)}")
     print(f"Simpson rule: {simpson_integral(np.sin, a, b, N)}")
     print("Exact result: 2")
 
-    N = np.arange(20, 1000, 10)
+    N = np.geomspace(20, 2000, N)
+    N = np.unique(2*np.round(N/2).astype(int))
     trap = np.array([int_trap(np.sin, a, b, i) for i in N])
     simpson = np.array([simpson_integral(np.sin, a, b, i) for i in N])
     err_trap = np.abs(trap - 2)
@@ -142,6 +151,21 @@ def main():
     plt.legend()
     plt.grid(True)
     plt.show()
+
+    # GAUSSIAN QUADRATURE 
+    print(f"\nGaussian quadrature for the integral of sin(x) between 0 and pi")
+    print(f"Integral with n = 2: {gauss_legendre(np.sin, 0, np.pi, 2)}")
+    print(f"Integral with n = 4: {gauss_legendre(np.sin, 0, np.pi, 4)}")
+    print(f"Integral with n = 6: {gauss_legendre(np.sin, 0, np.pi, 6)}")
+    print(f"Integral with n = 8: {gauss_legendre(np.sin, 0, np.pi, 8)}")
+
+    print(f"\nGaussian quadrature for the integral of |x-0.3| between -1 and 1")
+    print(f"Exact result {1+0.3*0.3}")
+    print(f"Integral with Simpson's rule: {simpson_integral(not_smooth_f, -1, 1, 100)}")
+    print(f"Integral with n = 2: {gauss_legendre(not_smooth_f, -1, 1, 2)}")
+    print(f"Integral with n = 4: {gauss_legendre(not_smooth_f, -1, 1, 4)}")
+    print(f"Integral with n = 6: {gauss_legendre(not_smooth_f, -1, 1, 6)}")
+    print(f"Integral with n = 8: {gauss_legendre(not_smooth_f, -1, 1, 8)}")
 
 if __name__ == "__main__":
     main()
