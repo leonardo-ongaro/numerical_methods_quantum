@@ -339,18 +339,8 @@ def main():
         err_one_side = np.abs(one_sided_dvs - exact_derivative)
         err_cen = np.abs(cen_dvs - exact_derivative)
 
-        popt1, pcov1 = curve_fit(model, h, err_one_side)
-        a1, b1 = popt1
-
-        popt2, pcov2 = curve_fit(model, h, err_cen)
-        a2, b2 = popt2
-
         plt.loglog(h, err_one_side, 'o', label='One-sided derivatives')
         plt.loglog(h, err_cen, 's', label='Central derivatives')
-
-        plt.loglog(h, model(h, a1, b1), '--', label=f'Fit one-sided derivatives: y={a1:.3e} x^{b1:.3f}')
-
-        plt.loglog(h, model(h, a2, b2), '--', label=f'Fit centrale derivatives: y={a2:.3e} x^{b2:.3f}')
         plt.title("Numerical instability")
 
         plt.xlabel('h')
@@ -367,12 +357,11 @@ def main():
     try:
         a = 0 
         b = np.pi 
-        N = 50
-
-        print(f"Integral of sin(x) between a = {a} and b = {b}")
-        print(f"Trapezoidal rule: {int_trap(np.sin, a, b, N)}")
-        print(f"Simpson rule: {simpson_integral(np.sin, a, b, N)}")
-        print("Exact result: 2")
+        for N in [20, 50, 120]:
+            print(f"\nIntegral of sin(x) between a = {a} and b = {b}")
+            print(f"Trapezoidal rule, with N={N}: {int_trap(np.sin, a, b, N)}")
+            print(f"Simpson rule, with N={N}: {simpson_integral(np.sin, a, b, N)}")
+            print("Exact result: 2")
 
         N = np.geomspace(20, 2000, N)
         N = np.unique(2*np.round(N/2).astype(int))
@@ -416,7 +405,7 @@ def main():
 
         print(f"\nGaussian quadrature for the integral of |x-0.3| between -1 and 1")
         print(f"Exact result {1+0.3*0.3}")
-        print(f"Integral with Simpson's rule: {simpson_integral(not_smooth_f, -1, 1, 100)}")
+        print(f"Integral with Simpson's rule: {simpson_integral(not_smooth_f, -1, 1, 120)}")
         print(f"Integral with n = 2: {gauss_legendre(not_smooth_f, -1, 1, 2)}")
         print(f"Integral with n = 4: {gauss_legendre(not_smooth_f, -1, 1, 4)}")
         print(f"Integral with n = 6: {gauss_legendre(not_smooth_f, -1, 1, 6)}")
