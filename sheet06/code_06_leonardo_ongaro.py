@@ -101,16 +101,16 @@ def errors_ho(eigvals, omega):
     # INPUT CHECKS 
     if not isinstance(eigvals, np.ndarray):
         raise TypeError("eigvals must be an array")
-    if not np.issubdtype(eigvals.dtype, (np.floating, float)):
+    if not np.issubdtype(eigvals.dtype, np.floating):
         raise TypeError("eigvals must contain floating numbers")
     if not isinstance(omega, (np.integer, int, float, np.floating)):
         raise TypeError("omega must be an integer or a float")
 
-    if (eigvals < 0).any():
+    if (eigvals <= 0).any():
         raise ValueError("N must be positive")
     if omega < 0:
         raise ValueError("omega must be non negative")
-    l = len(eigvals)
+    k = len(eigvals)
     en_spectrum = np.array([omega*(n + 0.5) for n in range(k)])
     errors = np.abs(eigvals - en_spectrum)  
 
@@ -118,7 +118,7 @@ def errors_ho(eigvals, omega):
 
 def quartic_oscillator_solver(N, L, lam, k):
     """
-        Compute the eigenvalues and eigenvectors of the hamiltonian of the quartic oscillator H = p^2/2 + 1/2*lambda*x^4.
+        Compute the eigenvalues and eigenvectors of the hamiltonian of the quartic oscillator H = p^2/2 + lambda*x^4.
 
         Parameters
         ----------
@@ -159,7 +159,7 @@ def quartic_oscillator_solver(N, L, lam, k):
         raise ValueError("L must be positive")
     if lam < 0:
         raise ValueError("lam must be non negative")
-    if k < N and k > N:
+    if k < 0 and k > N:
         raise ValueError("k must be positive and lesser than N")
     delta_x = 2 * L / (N-1)
 
@@ -171,7 +171,7 @@ def quartic_oscillator_solver(N, L, lam, k):
     md = 1/(delta_x**2) * np.ones(N)
     for i in range(N):
         x = -L + i * delta_x
-        md[i] += lam**2/2*x**4
+        md[i] += lam**2*x**4
     # hamiltonian 
     H = np.diag(md, 0) + np.diag(ud, 1) + np.diag(ld, -1)
     # eigenvalues and eigenvectros
@@ -240,17 +240,17 @@ def harm_osc_solver2(N, L, omega, k):
 
 def main():
     # EIGENVALUES AND EIGENVECTORS
+    omega = 1
     try:
         N = 1000
-        L = 100
-        omega = 1
+        L = 10
         k = 10
 
         eigvals, eigvectors = harm_osc_solver(N, L, omega, k)
         print(f"\nThe first {k} eigenvalues are:", eigvals)
         print(f"\nThe eigenvectors are:", eigvectors)
     
-        errors = errors_ho(eigvals, omega, k)
+        errors = errors_ho(eigvals, omega)
         plt.plot(range(k), errors)
 
         plt.xlabel("Eigenvalue index")
@@ -266,7 +266,7 @@ def main():
 
     # CONVERGENCE STUDY (FIXED L AND VARYING N)
     try:
-        L = 100
+        L = 10
         Nmin = 10
         Nmax = 2000
         step = 10
@@ -276,13 +276,13 @@ def main():
         for N in Ns:
             start_time = time.perf_counter()
             eigvals, _ = harm_osc_solver(N, L, omega, 1)
-            errors[int((N-Nmin)/step)] = errors_ho(eigvals, omega, 1)[0]
+            errors[int((N-Nmin)/step)] = errors_ho(eigvals, omega)[0]
             times[int((N-Nmin)/step)] = time.perf_counter() - start_time
 
         plt.loglog(Ns, errors)
         plt.xlabel("N")
         plt.ylabel("Error of the eigenvalue")
-        plt.title("Errors vs N")
+        plt.title("Errors vs N (L=10)")
         plt.grid(True)
         plt.show()
 
@@ -302,18 +302,18 @@ def main():
     try:
         N = 1000
         Lmin = 1
-        Lmax = 2001
+        Lmax = 601
         step = 10
         Ls = range(Lmin, Lmax, step)
         errors = np.zeros(len(Ls))
         for L in Ls:
             eigvals, _ = harm_osc_solver(N, L, omega, 1)
-            errors[int((L-Lmin)/step)] = errors_ho(eigvals, omega, 1)[0]
+            errors[int((L-Lmin)/step)] = errors_ho(eigvals, omega)[0]
 
         plt.loglog(Ls, errors)
         plt.xlabel("L")
         plt.ylabel("Error of the eigenvalue")
-        plt.title("Errors vs L")
+        plt.title("Errors vs L (N=1000)")
         plt.grid(True)
         plt.show()
 
@@ -341,7 +341,7 @@ def main():
 
     # OPTIMIZATION
     try:
-        L = 100
+        L = 10
         Nmin = 10
         Nmax = 2000
         step = 10
@@ -351,7 +351,7 @@ def main():
         for N in Ns:
             start_time = time.perf_counter()
             eigvals, _ = harm_osc_solver2(N, L, omega, 1)
-            errors[int((N-Nmin)/step)] = errors_ho(eigvals, omega, 1)[0]
+            errors[int((N-Nmin)/step)] = errors_ho(eigvals, omega)[0]
             times[int((N-Nmin)/step)] = time.perf_counter()-start_time
     
         plt.loglog(Ns, errors)
