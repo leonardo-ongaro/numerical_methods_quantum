@@ -268,7 +268,7 @@ def main():
     try:
         L = 10
         Nmin = 10
-        Nmax = 2000
+        Nmax = 2200
         step = 10
         Ns = range(Nmin, Nmax, step)
         errors = np.zeros(len(Ns))
@@ -343,7 +343,7 @@ def main():
     try:
         L = 10
         Nmin = 10
-        Nmax = 2000
+        Nmax = 5000
         step = 10
         Ns = range(Nmin, Nmax, step)
         times = np.zeros(len(Ns))
